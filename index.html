@@ -1,0 +1,355 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>NovaOS</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{--ac:#8ab4ff;--on:#0b1020;--bg:#11141b;--fg:#e8eaf0;--sf:rgba(44,50,66,.78);--s2:rgba(255,255,255,.09)}
+body.light{--bg:#f3f5fa;--fg:#14181f;--sf:rgba(255,255,255,.85);--s2:rgba(0,0,0,.07)}
+*{box-sizing:border-box;margin:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden;background:#000;font:15px Figtree,system-ui,sans-serif;color:var(--fg);user-select:none}
+button,input,textarea{font:inherit;color:inherit}
+button{border:0;background:var(--s2);border-radius:14px;padding:10px 14px;cursor:pointer}
+button.p{background:var(--ac);color:var(--on);font-weight:600}
+input,textarea{background:var(--s2);border:0;border-radius:14px;padding:11px 14px;outline:0;width:100%;user-select:text}
+#os{position:absolute;left:50%;top:50%;width:390px;height:844px;overflow:hidden;background:var(--bg)}
+#wall,#lock{position:absolute;inset:0;transition:.4s}
+#sb{position:absolute;top:0;left:0;right:0;height:34px;z-index:60;display:flex;justify-content:space-between;padding:10px 20px 0;font-weight:600;font-size:13px;color:#fff;text-shadow:0 1px 4px #0006}
+#os.inapp #sb{color:var(--fg);text-shadow:none}
+#home{position:absolute;inset:0;padding-top:40px}
+#srch{margin:10px 18px;background:#fff3;backdrop-filter:blur(14px);color:#fff}
+#srch::placeholder{color:#fffb}
+#pages{display:flex;height:640px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none}
+.pg{min-width:390px;scroll-snap-align:start;padding:6px 14px;display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:92px;align-content:start}
+.wd{grid-column:1/5;grid-row:span 2;color:#fff;padding:4px 10px}
+.wd b{font-size:64px;font-weight:800;letter-spacing:-3px;display:block;line-height:1}
+.ic{display:flex;flex-direction:column;align-items:center;gap:5px;color:#fff;font-size:11px;text-shadow:0 1px 4px #0008;animation:pop .35s both}
+.ic i{width:58px;height:58px;border-radius:19px;display:grid;place-items:center;font-size:28px;font-style:normal;box-shadow:0 4px 14px #0004}
+@keyframes pop{from{transform:scale(.6);opacity:0}}
+#dots{display:flex;gap:6px;justify-content:center;height:14px}#dots u{width:6px;height:6px;border-radius:9px;background:#fff6}#dots u.on{background:#fff;width:16px}
+#dock{position:absolute;left:14px;right:14px;bottom:16px;height:84px;border-radius:30px;background:#fff3;backdrop-filter:blur(20px);display:flex;justify-content:space-around;align-items:center}
+.app{position:absolute;inset:0;background:var(--bg);padding:40px 16px 62px;overflow:auto;transform:scale(.9);opacity:0;pointer-events:none;transition:.25s;border-radius:28px}
+.app.on{transform:none;opacity:1;pointer-events:auto;border-radius:0}
+.app h1{font-size:30px;font-weight:800;margin:8px 0 14px}.app h3{margin:18px 0 8px;opacity:.7;font-weight:600}
+#nav{position:absolute;bottom:0;left:0;right:0;height:54px;z-index:70;background:var(--sf);backdrop-filter:blur(20px);display:none;justify-content:space-around;align-items:center}
+#os.inapp #nav{display:flex}#nav button{background:none;font-size:22px;width:80px}
+#rec{position:absolute;inset:0;z-index:65;background:#000b;backdrop-filter:blur(18px);display:none;flex-direction:column;justify-content:center;gap:14px;color:#fff}
+#rec.on{display:flex}#rl{display:flex;gap:16px;overflow-x:auto;padding:0 112px;scroll-snap-type:x mandatory}
+.rc{min-width:166px;scroll-snap-align:center}.rc div{width:166px;height:356px;border-radius:22px;overflow:hidden;position:relative;background:var(--bg);color:var(--fg)}
+.rc .app{transform:scale(.425);transform-origin:0 0;width:390px;height:844px;opacity:1;position:absolute;pointer-events:none}
+#shade{position:absolute;inset:0;z-index:80;background:var(--bg);padding:44px 16px;transform:translateY(-102%);transition:.35s;overflow:auto}#shade.on{transform:none}
+.tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:12px 0}.tiles button{padding:16px 6px;border-radius:22px}.tiles button.on{background:var(--ac);color:var(--on)}
+.nt{background:var(--s2);border-radius:18px;padding:12px 14px;margin-bottom:8px;display:flex;justify-content:space-between;gap:8px}
+#lock{z-index:90;color:#fff;text-align:center;padding-top:90px;touch-action:none}
+#lock::before{content:"";position:absolute;inset:0;background:#0004;z-index:-1}
+#lock b{font-size:92px;font-weight:800;letter-spacing:-4px;display:block;line-height:1}
+#lock.up{transform:translateY(-105%)}
+#pad{display:none;grid-template-columns:repeat(3,76px);gap:12px;justify-content:center;margin:18px auto}#lock.pw #pad{display:grid}
+#pad button{height:64px;border-radius:32px;font-size:24px;background:#fff3;color:#fff}
+.shake{animation:sh .35s}@keyframes sh{30%{transform:translateX(-14px)}60%{transform:translateX(14px)}}
+#tt{position:absolute;bottom:80px;left:50%;transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:10px 18px;border-radius:20px;z-index:99;opacity:0;transition:.3s;pointer-events:none}#tt.on{opacity:1}
+.row{display:flex;justify-content:space-between;align-items:center;background:var(--s2);border-radius:16px;padding:13px 16px;margin-bottom:8px;gap:10px}
+.wg{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}.wg div{aspect-ratio:9/14;border-radius:12px;border:2px solid transparent}.wg .sel{border-color:var(--ac)}
+.sw{display:inline-block;width:34px;height:34px;border-radius:50%;margin:4px;border:3px solid transparent}
+#menu{position:absolute;z-index:75;background:var(--sf);backdrop-filter:blur(20px);border-radius:16px;padding:6px;box-shadow:0 8px 30px #0006}#menu div{padding:10px 18px}
+.cg{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.cg button{height:62px;font-size:22px;border-radius:20px}
+.tm{background:#000;color:#7CFC9A;font:13px ui-monospace,monospace;padding:10px;border-radius:14px;height:560px;overflow:auto;user-select:text;white-space:pre-wrap}
+#dock,#srch,#nav,#menu,#pad button,#lock>div button,#lp{background:rgba(9,12,22,.8);backdrop-filter:none;-webkit-backdrop-filter:none;border:1px solid color-mix(in srgb,var(--ac) 55%,transparent);box-shadow:0 0 22px color-mix(in srgb,var(--ac) 30%,transparent),0 8px 24px rgba(0,0,0,.5)}
+#menu,#nav{color:#fff}.nt,.tiles button{border:1px solid color-mix(in srgb,var(--ac) 45%,transparent)}.tiles button.on{box-shadow:0 0 20px var(--ac)}
+.wd b,#lt{background:linear-gradient(100deg,#fff 15%,var(--ac) 55%,#ff6ad5);-webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:none}
+.app h1{background:linear-gradient(90deg,var(--fg),var(--ac) 70%,#ff6ad5);-webkit-background-clip:text;background-clip:text;color:transparent}
+button.p{background:linear-gradient(135deg,var(--ac),#ff6ad5);box-shadow:0 0 18px color-mix(in srgb,var(--ac) 55%,transparent)}
+.row{border-left:3px solid var(--ac)}#dots u.on{background:var(--ac);box-shadow:0 0 10px var(--ac)}
+#wall{overflow:hidden}#wall::after{content:'';position:absolute;inset:-60%;background:conic-gradient(from 0deg,var(--ac),transparent 25%,#ff4fd8 50%,transparent 75%,var(--ac));opacity:.3;filter:blur(80px);animation:spin 28s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
+.app{background:radial-gradient(circle at 85% -10%,color-mix(in srgb,var(--ac) 22%,transparent),transparent 45%),var(--bg)}
+.tiles button.on{background:var(--ac)}
+.ic i{position:relative;overflow:hidden;border:1px solid rgba(255,255,255,.18);box-shadow:0 0 0 1px #0006,0 8px 20px rgba(0,0,0,.55)}
+.ic i::after{content:"";position:absolute;inset:0;background:linear-gradient(160deg,rgba(255,255,255,.5),transparent 48%)}
+#nav button{background:none;border:0;box-shadow:none}
+#off{position:absolute;inset:0;z-index:100;background:#000;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;opacity:0;pointer-events:none;transition:opacity .6s}#off.on{opacity:1;pointer-events:auto}
+#lh{pointer-events:none}#lock.pw #ln{display:none}#lock.pw #lt{font-size:70px}#lt{white-space:nowrap;font-size:78px;letter-spacing:-3px}#lock.pw{padding-top:60px}#lock.pw #lh{bottom:104px}
+html,body,button,input,textarea{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Helvetica Neue',Helvetica,Arial,sans-serif}
+body{--bg:#000;--s2:#1c1c1e;--fg:#fff}body.light{--bg:#f2f2f7;--s2:#fff;--fg:#000}
+#wall::after{display:none}.app{background:var(--bg)}
+#sb{font-weight:600;font-size:12px}#sb::before{content:'NovaOS'}#clk{position:absolute;left:50%;transform:translateX(-50%);font-size:13px}
+.ic{font-size:11px;font-weight:500;text-shadow:0 1px 2px rgba(0,0,0,.45)}.ic i{width:60px;height:60px;border-radius:14px;border:0;box-shadow:0 1px 3px rgba(0,0,0,.35)}.ic i::after{background:linear-gradient(180deg,rgba(255,255,255,.32),transparent 55%)}
+#srch{background:rgba(255,255,255,.28);backdrop-filter:blur(20px);border:0;box-shadow:none;border-radius:12px;text-align:center;color:#fff}
+#dock{left:8px;right:8px;bottom:8px;height:90px;border-radius:26px;background:rgba(255,255,255,.3);backdrop-filter:blur(30px);border:0;box-shadow:none}
+#dots u.on{width:6px;background:#fff;box-shadow:none}
+.wd b{background:none;-webkit-text-fill-color:#fff;font-weight:300;letter-spacing:-2px}
+#lt{background:none;-webkit-text-fill-color:#fff;font-weight:200;font-size:88px;letter-spacing:-2px}#lock.pw #lt{font-size:64px}#ld{font-size:19px;font-weight:500;margin-top:6px}
+#lh{bottom:96px;font-size:20px;font-weight:300;background:linear-gradient(90deg,rgba(255,255,255,.45) 30%,#fff 50%,rgba(255,255,255,.45) 70%) 0 0/200% 100%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:shim 2.6s linear infinite}@keyframes shim{to{background-position:-200% 0}}
+#pad{grid-template-columns:repeat(3,75px);gap:14px}#pad button{width:75px;height:75px;border-radius:50%;background:rgba(255,255,255,.22);border:0;box-shadow:none;font-weight:300;font-size:34px;padding:0}
+#lock>div button,#lp{border-radius:50%;width:50px;height:50px;padding:0;background:rgba(0,0,0,.4);border:0;box-shadow:none}
+#lock .nt{background:rgba(255,255,255,.78)!important;color:#000;border:0;border-radius:14px}
+.nt,.tiles button{border:0;border-radius:14px}.tiles button{border-radius:22px;background:var(--s2)}.tiles button.on{background:var(--ac);color:#fff;box-shadow:none}
+#nav{background:var(--s2);border:0;border-top:.5px solid rgba(128,128,128,.4);box-shadow:none;color:var(--ac)}#nav button{color:var(--ac)}
+#menu{background:rgba(250,250,250,.96);color:#000;border:0;border-radius:14px;box-shadow:0 8px 30px rgba(0,0,0,.3)}
+.app h1{background:none;-webkit-text-fill-color:var(--fg);font-size:34px;font-weight:700}.app h3{text-transform:uppercase;font-size:13px;font-weight:400;opacity:.6;margin:22px 0 6px 12px}
+.row{border-left:0;border-radius:12px;margin-bottom:6px;box-shadow:none}input,textarea{border-radius:10px}
+button.p{background:var(--ac);color:#fff;box-shadow:none}
+.row>button[data-t]{font-size:0;width:51px;height:31px;padding:0;position:relative;background:rgba(120,120,128,.32);border-radius:16px;transition:.2s}.row>button[data-t]::after{content:'';position:absolute;top:2px;left:2px;width:27px;height:27px;border-radius:50%;background:#fff;box-shadow:0 2px 4px rgba(0,0,0,.3);transition:.2s}.row>button[data-t].p{background:#34c759}.row>button[data-t].p::after{left:22px}
+.cg button{border-radius:31px}
+#lock #lt{font-weight:200;font-size:72px;letter-spacing:-1px}#lock.pw #lt{font-size:56px}
+#lh{display:none}#lock.pw #lh{display:block;bottom:104px}
+#sl{position:absolute;left:30px;right:30px;bottom:100px;height:56px;border-radius:28px;background:rgba(255,255,255,.22);display:flex;align-items:center;justify-content:center;font-size:19px;font-weight:300;--p:0}#lock.pw #sl{display:none}
+#sl span{padding-left:40px;background:linear-gradient(90deg,rgba(255,255,255,.5) 30%,#fff 50%,rgba(255,255,255,.5) 70%) 0 0/200% 100%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:shim 2.6s linear infinite;opacity:calc(1 - var(--p)*1.6)}
+#sk{position:absolute;left:4px;top:4px;width:48px;height:48px;border-radius:24px;background:#fff;color:#444;display:grid;place-items:center;font-size:30px;cursor:grab;touch-action:none;box-shadow:0 2px 8px rgba(0,0,0,.3)}#sk:active{cursor:grabbing}
+html,body,button,input,textarea{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','SF Pro Text','Helvetica Neue',Helvetica,Arial,sans-serif}
+#os::before{content:'';position:absolute;top:11px;left:50%;transform:translateX(-50%);width:120px;height:35px;border-radius:20px;background:#000;z-index:100;pointer-events:none}
+#os::after{content:'';position:absolute;bottom:7px;left:50%;transform:translateX(-50%);width:136px;height:5px;border-radius:3px;background:#fff;z-index:101;pointer-events:none;box-shadow:0 0 4px rgba(0,0,0,.3)}#os.inapp::after{background:var(--fg);box-shadow:none}
+#sb{padding:17px 30px 0;font-size:15px;font-weight:600}#sb::before{content:''}#clk{left:30px;transform:none;font-size:15px}
+#home{padding-top:50px}.app{padding-top:58px}
+.ic{font-size:11.5px;font-weight:500;text-shadow:0 1px 2px rgba(0,0,0,.25)}.ic i{border-radius:14px;box-shadow:0 1px 2px rgba(0,0,0,.25)}.ic i::after{background:linear-gradient(180deg,rgba(255,255,255,.22),transparent 60%)}
+#dock{left:12px;right:12px;bottom:22px;height:92px;border-radius:36px;background:rgba(255,255,255,.22);backdrop-filter:blur(40px) saturate(1.5)}
+#srch{border-radius:22px;background:rgba(255,255,255,.22);backdrop-filter:blur(30px)}
+.wd{background:rgba(255,255,255,.2);backdrop-filter:blur(30px) saturate(1.4);border-radius:26px;padding:16px 18px;margin:0 4px 8px}.wd b{font-size:52px;font-weight:600;letter-spacing:-2px}
+#lock{display:flex;flex-direction:column;padding-top:78px}#ld{order:-1;font-size:20px;font-weight:600;margin:0 0 -2px;opacity:.92}
+#lock #lt{font-size:100px;font-weight:700;letter-spacing:-4px;line-height:1.05}#lock.pw #lt{font-size:72px}#lock.pw{padding-top:70px}
+#lock .nt{background:rgba(255,255,255,.2)!important;color:#fff;backdrop-filter:blur(30px);border-radius:24px}
+#pad button{font-weight:400;backdrop-filter:blur(20px);background:rgba(255,255,255,.2)}#sl{backdrop-filter:blur(20px)}
+#lock>div button,#lp{background:rgba(0,0,0,.32);backdrop-filter:blur(20px);width:54px;height:54px}#lock>div:last-of-type{padding:0 46px!important;bottom:44px!important}
+#shade{background:rgba(20,20,26,.78);backdrop-filter:blur(40px);color:#fff}#shade h3{font-size:16px;opacity:.8}#shade .tiles button,#shade .nt{background:rgba(255,255,255,.14);color:#fff}#shade .tiles button{border-radius:28px}#shade .tiles button.on{background:var(--ac)}#shade button{color:#fff}#shade button.p{background:var(--ac)}
+.row{border-radius:14px}
+#lock.pw::before{background:radial-gradient(circle at 15% 25%,rgba(29,77,255,.55),transparent 55%),radial-gradient(circle at 90% 65%,rgba(106,44,255,.5),transparent 55%),rgba(2,6,18,.78)}
+#lock.pw #lh{position:static!important;order:0;width:auto!important;margin:14px 0 10px;font-size:34px;line-height:22px;font-weight:600;letter-spacing:6px;animation:none;background:none;-webkit-text-fill-color:#9fd0ff;text-shadow:0 0 12px rgba(80,150,255,.9);min-height:24px}
+#lock.pw #pad{order:1}#pad{grid-template-columns:repeat(3,78px);gap:16px}
+#lock #pad button{width:78px;height:78px;border-radius:24px;background:linear-gradient(160deg,#243152,#0a0f1e);border:1px solid rgba(120,170,255,.38);box-shadow:inset 0 1px 0 rgba(255,255,255,.2),inset 0 -8px 14px rgba(0,0,0,.45),0 8px 18px rgba(0,0,0,.55),0 0 16px rgba(60,130,255,.28);color:#8fc0ff;text-shadow:0 0 12px rgba(80,150,255,.85);font-size:32px;font-weight:500;backdrop-filter:none;transition:transform .08s}
+#pad button:active{transform:scale(.92)}#lock #pad button:nth-child(10){color:#ff7aa8;text-shadow:0 0 12px rgba(255,90,150,.8)}#lock #pad button:nth-child(12){color:#4dffa6;text-shadow:0 0 12px rgba(40,255,150,.8)}
+#pwi{background:#0b1020!important;border:1px solid rgba(120,170,255,.4);border-radius:20px;color:#9fd0ff!important;text-align:center;box-shadow:0 0 16px rgba(60,130,255,.25)}
+html,body,button,input,textarea{font-family:'Figtree','Roboto','Segoe UI',system-ui,sans-serif}
+body{--bg:#000;--s2:#1f1f22}body.light{--bg:#f3f3f5;--s2:#fff}
+#os::before{width:15px;height:15px;top:13px;border-radius:50%}#os::after{display:none}
+#sb{padding:12px 26px 0;font-size:14px}#clk{left:26px;font-size:14px}
+#home{padding-top:46px}.app{padding:50px 16px 56px}#pages{height:596px}
+#srch{position:absolute;bottom:124px;left:18px;right:18px;margin:0;width:auto;height:46px;background:#fff;color:#222;border-radius:26px;box-shadow:0 3px 12px rgba(0,0,0,.25);text-align:left;padding-left:22px;backdrop-filter:none}#srch::placeholder{color:#666}
+.ic i{border-radius:19px}#dock{bottom:18px;height:88px;border-radius:32px;background:rgba(255,255,255,.26)}
+#lock #lt{font-weight:300;font-size:92px;letter-spacing:-3px}
+.app h1{font-size:34px;font-weight:600;margin:34px 0 30px 6px}.row{border-radius:26px;padding:16px 20px}.row>button[data-t].p{background:var(--ac)}
+#nav{background:var(--bg);border:0;height:50px;color:var(--fg)}#nav button{color:var(--fg);width:110px;height:50px;border-radius:0}#nav b{font-size:22px;font-weight:400;letter-spacing:1px}.ho{display:inline-block;width:22px;height:22px;border:2.5px solid currentColor;border-radius:50%;vertical-align:middle}#nb{font-size:38px;line-height:1}
+#nx{position:absolute;top:50px;right:14px;z-index:72;width:34px;height:34px;padding:0;border-radius:50%;display:none;background:rgba(128,128,128,.28);color:var(--fg);font-size:14px}#os.inapp #nx{display:block}
+#shade .tiles button{border-radius:34px;padding:20px 6px}#br{accent-color:var(--ac);height:30px}
+#os{transition:transform .5s ease}
+#os.land{width:844px;height:390px}
+#os.land #sb{display:none}
+#os.land::before{top:50%;left:13px;transform:translateY(-50%)}
+#os.land #nav{left:auto;top:0;bottom:0;right:0;width:48px;height:auto;flex-direction:column}
+#os.land #nav button{width:48px;height:auto;flex:1}
+#os.land #nx{top:8px;right:56px}
+#os.land .app{right:48px;border-radius:0}
+input,textarea{-webkit-user-select:text;user-select:text;font-size:16px}
+</style></head><body>
+<div id="os"><div id="wall"></div><div id="sb"><span id="clk"></span><span id="st"></span></div>
+<div id="home"><input id="srch" placeholder="Search apps or the web with Nafari"><div id="pages"></div><div id="dots"></div><div id="dock"></div></div>
+<div id="apps"></div><div id="nav"><button id="nr"><b>|||</b></button><button id="nh"><span class="ho"></span></button><button id="nb">&#8249;</button></div><button id="nx">✕</button>
+<div id="rec"><div id="rl"></div><center><button id="ca">Close all</button></center></div>
+<div id="shade"></div>
+<div id="off"></div><div id="lock"><button id="lp" style="position:absolute;top:44px;right:16px;color:#fff;border-radius:50%;width:42px;height:42px;padding:0">⏻</button><b id="lt"></b><div id="ld"></div><div id="ln" style="margin:30px 24px;text-align:left"></div>
+<div id="pad"></div><div id="sl"><div id="sk">›</div><span>slide to unlock</span></div><p id="lh" style="position:absolute;bottom:90px;width:100%">› slide to unlock</p>
+<div style="position:absolute;bottom:26px;width:100%;display:flex;justify-content:space-between;padding:0 40px"><button id="fl" style="background:#fff3;color:#fff;font-size:20px">🔦</button><button id="cm" style="background:#fff3;color:#fff;font-size:20px">📷</button></div></div>
+<div id="tt"></div></div>
+<script>
+const L=localStorage,$=(s,e=document)=>e.querySelector(s),os=$('#os');
+const el=(t,c,h)=>{const e=document.createElement(t);if(c)e.className=c;if(h!=null)e.innerHTML=h;return e};
+let S=Object.assign({dark:1,ac:'#8ab4ff',wp:2,lwp:8,lt:'',pin:'',lockon:1,inst:['settings','store','browser','calc','clock'],notes:[],bm:['https://en.wikipedia.org'],wifi:1,bt:0,air:0,dnd:0,br:100,cap:matchMedia('(pointer:coarse)').matches?0:1,cust:null,fs:{'/':0,'/home':0,'/home/nova':0,'/home/nova/readme.txt':'Welcome to NovaOS.'}},JSON.parse(L.nova||'{}'));
+const save=()=>{try{L.nova=JSON.stringify(S)}catch(e){toast('Storage full')}};
+let tm;const toast=t=>{const x=$('#tt');x.textContent=t;x.classList.add('on');clearTimeout(tm);tm=setTimeout(()=>x.classList.remove('on'),1800)};
+const WN=['Aurora','Dusk','Lagoon','Ember','Orchid','Moss','Tide','Sunset','Nebula','Glacier','Mango','Berry','Slate','Jade','Rose'];
+const wp=i=>i<0&&S.cust?`url(${S.cust}) center/cover`:`radial-gradient(circle at 25% 15%,hsl(${i*24} 75% 48%),transparent 55%),linear-gradient(165deg,hsl(${i*24+50} 55% 24%),hsl(${i*24+210} 65% 9%))`;
+function theme(){if(!S.ios){S.ios=1;S.ac='#007aff';S.dark=0;save()}if(!S.sam){S.sam=1;S.ac='#3e91ff';save()}document.documentElement.style.setProperty('--ac',S.ac);document.body.classList.toggle('light',!S.dark);$('#wall').style.background=wp(S.wp);$('#lock').style.background=wp(S.lwp);os.style.filter=`brightness(${S.br/100})`}
+let OSROT=0;const fit=()=>{const l=os.classList.contains('land'),w=l?844:390,h=l?390:844;OSROT=l&&innerHeight>innerWidth?-90:0;
+ const k=OSROT?Math.min(innerWidth/h,innerHeight/w):Math.min(innerWidth/w,innerHeight/h);os.style.transform=`translate(-50%,-50%) rotate(${OSROT}deg) scale(${k})`};
+const setLand=on=>{os.classList.toggle('land',!!on);fit()};addEventListener('resize',fit);fit();
+let N=[{a:'📨',t:'Welcome to NovaOS',x:'Swipe down from the top for quick settings.'},{a:'🛍️',t:'App Store',x:'Install Notes, Terminal and Weather.'}];
+const notify=(a,t,x)=>{if(!S.dnd)N.unshift({a,t,x});lockN()};
+/* ---- apps ---- */
+const A={
+settings:{n:'Settings',i:'⚙️',c:'#5b6b8c',sys:1,d:'Personalize and secure NovaOS.',m:mSettings},
+store:{n:'App Store',i:'🛍️',c:'#3d7de0',sys:1,d:'Find and install apps.',m:mStore},
+browser:{n:'Nafari',i:'🧭',c:'#1fa37a',d:'Tabs, bookmarks and history.',m:mBrowser},
+calc:{n:'Calculator',i:'🧮',c:'#e0793d',d:'Fast everyday math.',m:mCalc},
+clock:{n:'Clock',i:'⏰',c:'#7a5ae0',d:'Clock, stopwatch and timer.',m:mClock},
+notes:{n:'Notes',i:'📝',c:'#d9b02e',d:'Write notes that stay saved.',m:mNotes},
+term:{n:'Terminal',i:'⌨️',c:'#222',d:'A safe Linux-style shell.',m:mTerm},
+mc:{land:1,n:'Minecraft: BE',i:'⛏️',c:'#5b8c2a',d:'Minecraft in the browser with touch keys.',m:e=>mGame(e,'games/minecraft/index.html','https://minecraftweb.pages.dev/',1)},
+gd:{land:1,n:'Geometry Dash',i:'🔷',c:'#1d8fe0',d:'Web Dashers, play Geometry Dash.',m:e=>mGame(e,'games/dashers/index.html','https://web-dashers.github.io/',0)},
+web:{n:'Links',i:'🔗',c:'#0a84ff',d:'Open any link inside NovaOS.',m:mWeb},
+weather:{n:'Weather',i:'⛅',c:'#3aa0d9',d:'Sample forecast.',m:mWeather},
+snake:{n:'Snake',i:'🐍',c:'#1e8c5a',d:'Swipe or use arrow keys.',m:mSnake},ttt:{n:'Tic-Tac-Toe',i:'❌',c:'#c0392b',d:'Beat Nova.',m:mTTT},mem:{n:'Memory',i:'🧠',c:'#8e44ad',d:'Match all 8 pairs.',m:mMem},flap:{n:'Nova Flap',i:'🛸',c:'#2c3e9c',d:'Tap to fly through gaps.',m:mFlap},pong:{n:'Pong',i:'🏓',c:'#d35400',d:'Move to block the ball.',m:mPong},react:{n:'Reaction',i:'⚡',c:'#b8860b',d:'How fast are you?',m:mReact},whack:{n:'Whack',i:'👾',c:'#16807a',d:'30 seconds, hit them all.',m:mWhack}};
+const running=[];let cur=null;
+function openApp(id){if(!S.inst.includes(id))return;if(cur&&cur!=id&&A[cur]&&A[cur].land)killApp(cur);let r=running.find(x=>x.id==id);if(!r){const e=el('div','app');$('#apps').append(e);A[id].m(e);r={id,e};running.push(r)}
+ running.splice(running.indexOf(r),1);running.push(r);running.forEach(x=>x.e.classList.toggle('on',x==r));cur=id;os.classList.add('inapp');setLand(A[id].land);$('#rec').classList.remove('on')}
+const killApp=id=>{const i=running.findIndex(x=>x.id==id);if(i>=0){running[i].e.remove();running.splice(i,1)}};
+function home(){const g=cur;cur=null;setLand(0);if(g&&A[g]&&A[g].land)killApp(g);running.forEach(x=>x.e.classList.remove('on'));os.classList.remove('inapp');$('#rec').classList.remove('on')}
+function closeApp(id){const i=running.findIndex(x=>x.id==id);if(i<0)return;running[i].e.remove();running.splice(i,1);if(cur==id)home()}
+$('#nb').onclick=()=>{if(!$('#rec').classList.contains('on'))home();else $('#rec').classList.remove('on')};
+$('#nx').onclick=()=>cur&&closeApp(cur);$('#nh').onclick=home;
+$('#nr').onclick=()=>{setLand(0);const rl=$('#rl');rl.innerHTML='';if(!running.length)rl.innerHTML='<p style="margin:auto">No recent apps</p>';
+ [...running].reverse().forEach(r=>{const c=el('div','rc',`<p style="margin:0 6px 6px">${A[r.id].i} ${A[r.id].n}</p>`),w=el('div');{const cl=r.e.cloneNode(true);cl.querySelectorAll('iframe').forEach(i=>i.remove());w.append(cl)}c.append(w);
+  const x=el('button','', '✕');x.style.cssText='position:absolute;top:6px;right:6px;padding:4px 9px';x.onclick=e=>{e.stopPropagation();closeApp(r.id);c.remove()};w.append(x);w.onclick=()=>openApp(r.id);rl.append(c)});$('#rec').classList.add('on')};
+$('#ca').onclick=()=>{[...running].forEach(r=>closeApp(r.id));$('#rl').innerHTML='';home()};
+/* ---- home ---- */
+const ico=id=>{const a=A[id],d=el('div','ic',`<i style="background:${a.c}">${a.i}</i>${a.n}`);d.onclick=()=>openApp(id);let t;
+ d.onpointerdown=e=>{t=setTimeout(()=>menu(id,e),500)};d.onpointerup=d.onpointerleave=()=>clearTimeout(t);return d};
+function menu(id,e){$('#menu')?.remove();const m=el('div','',`<div>Open</div>${A[id].sys?'':'<div>Uninstall</div>'}`);m.id='menu';const b=os.getBoundingClientRect(),k=b.width/390;
+ m.style.cssText=`left:${Math.min((e.clientX-b.left)/k,250)}px;top:${(e.clientY-b.top)/k}px`;m.children[0].onclick=()=>{m.remove();openApp(id)};if(m.children[1])m.children[1].onclick=()=>{m.remove();uninstall(id)};os.append(m);setTimeout(()=>addEventListener('pointerdown',()=>m.remove(),{once:true}),50)}
+function build(){const dk=['browser','calc','clock','settings'].filter(x=>S.inst.includes(x));$('#dock').innerHTML='';dk.forEach(i=>$('#dock').append(ico(i)));
+ const ids=S.inst.filter(x=>!dk.includes(x)),P=$('#pages');P.innerHTML='';let pgs=[ids.slice(0,8)];for(let i=8;i<ids.length;i+=16)pgs.push(ids.slice(i,i+16));
+ pgs.forEach((g,n)=>{const p=el('div','pg');if(!n){const w=el('div','wd',`<b id="wt"></b><div id="wdt"></div><div style="margin-top:10px">⛅ 18° Partly cloudy · sample</div>`);w.onclick=()=>openApp('weather');p.append(w)}g.forEach(i=>p.append(ico(i)));P.append(p)});
+ const d=$('#dots');d.innerHTML='';pgs.forEach((_,i)=>d.append(el('u',i?'':'on')));P.onscroll=()=>[...d.children].forEach((u,i)=>u.classList.toggle('on',i==Math.round(P.scrollLeft/390)));tick()}
+function uninstall(id){const nm=A[id].n;S.inst=S.inst.filter(x=>x!=id);closeApp(id);if(id.startsWith('w_')){S.web=S.web.filter(w=>w.id!=id);delete A[id]}save();build();toast(nm+' uninstalled')}
+$('#srch').oninput=e=>{const q=e.target.value.toLowerCase(),P=$('#pages');if(!q){build();return}P.innerHTML='';const p=el('div','pg');P.append(p);
+ S.inst.filter(i=>A[i].n.toLowerCase().includes(q)).forEach(i=>p.append(ico(i)));const w=el('div','ic','<i style="background:#1fa37a">🔎</i>Search web');w.onclick=()=>{$('#srch').value='';BR.go(q);openApp('browser');build()};p.append(w)};
+/* ---- status, clock, lock ---- */
+let bat=100;navigator.getBattery?.().then(b=>{const u=()=>{bat=Math.round(b.level*100);tick()};b.onlevelchange=u;u()});
+function tick(){const d=new Date(),t=d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}),ds=d.toLocaleDateString([],{weekday:'long',month:'long',day:'numeric'});
+ $('#clk').textContent=t;$('#lt').textContent=d.toLocaleTimeString([],{hour:'numeric',minute:'2-digit'}).replace(/\s?[AP]M/i,'');$('#ld').textContent=ds;const a=$('#wt');if(a){a.textContent=t;$('#wdt').textContent=ds}
+ $('#st').textContent=`${S.air?'✈ ':''}${S.wifi&&!S.air?'📶 ':''}${S.bt&&!S.air?'ᛒ ':''}${S.dnd?'🔕 ':''}🔋${bat}%`}
+setInterval(tick,1000);
+function lockN(){$('#ln').innerHTML=N.slice(0,2).map(n=>`<div class="nt" style="background:#fff3"><span>${n.a} <b style="font-size:14px;display:inline;letter-spacing:0">${n.t}</b><br>${n.x}</span></div>`).join('')}
+let buf='';const lk=$('#lock');
+function doLock(){buf='';lk.classList.remove('up','pw');lk.classList.remove('shake');setPad();lockN();home();$('#shade').classList.remove('on')}
+function setPad(){const p=$('#pad');p.innerHTML='';$('#lh').textContent='› slide to unlock';if(!S.lt){p.style.cssText='display:block;margin:26px auto';p.innerHTML='<button class="p" id="ok" style="width:84px;height:84px;border-radius:50%;font-size:40px;padding:0">✓</button>';$('#ok').onclick=e=>{e.stopPropagation();lk.classList.add('up')};$('#lh').textContent='Tap ✓ to unlock';return}if(S.lt=='pw'){p.style.display='block';p.innerHTML='<input id="pwi" type="password" placeholder="Password" style="background:#fff3;color:#fff;margin-bottom:10px"><button class="p" id="pwg">Unlock</button>';p.style.cssText='display:none;padding:0 50px;margin-top:18px';$('#pwg').onclick=()=>chk($('#pwi').value);$('#pwi').onkeydown=k=>k.key=='Enter'&&chk(k.target.value);return}
+ p.style.cssText='';[1,2,3,4,5,6,7,8,9,'⌫',0,'✓'].forEach(k=>{const b=el('button','',k);b.onclick=()=>{if(k=='⌫')buf=buf.slice(0,-1);else if(k=='✓')chk(buf);else buf+=k;$('#lh').textContent='•'.repeat(buf.length)||'Enter PIN'};p.append(b)})}
+function chk(v){if(v===S.pin){lk.classList.add('up');lk.classList.remove('pw');buf='';if($('#pwi'))$('#pwi').value=''}else{lk.classList.add('shake');setTimeout(()=>lk.classList.remove('shake'),400);toast('Wrong '+(S.lt=='pw'?'password':'PIN')+'. Try again.');buf='';$('#lh').textContent='Enter PIN'}}
+function unlockTry(){if(!S.lt){lk.classList.add('up');return}lk.classList.add('pw');if(S.lt=='pw'){$('#pad').style.display='block';$('#lh').textContent='Enter password'}else $('#lh').textContent='Enter PIN'}
+let y0;lk.onpointerdown=e=>y0=e.clientY;lk.onpointerup=e=>{if(y0-e.clientY>60||(Math.abs(y0-e.clientY)<6&&e.target==$('#lh')))unlockTry()};
+let fl=0;$('#fl').onclick=e=>{e.stopPropagation();fl=!fl;lk.style.outline=fl?'400px solid #fffe':'';toast('Flashlight '+(fl?'on':'off'))};$('#cm').onclick=e=>{e.stopPropagation();toast('Camera is not available in this browser build')};
+/* ---- shade ---- */
+const sh=$('#shade');
+function shade(){const T=[['wifi','📶','Wi-Fi'],['bt','ᛒ','Bluetooth'],['air','✈️','Airplane'],['dark','🌙','Dark mode'],['dnd','🔕','Do not disturb']];
+ sh.innerHTML=`<div class="tiles">${T.map(([k,i,n])=>`<button data-k="${k}" class="${(k=='dark'?S.dark:S[k])?'on':''}">${i}<br>${n}</button>`).join('')}</div><input type="range" min="30" max="100" value="${S.br}" id="br" style="padding:0"><p style="margin:10px 0">🔋 Battery ${bat}% · Brightness</p>
+ <div style="display:flex;justify-content:space-between;align-items:center"><h3>Notifications</h3><button id="cl">Clear all</button></div>${N.map((n,i)=>`<div class="nt"><span>${n.a} <b>${n.t}</b><br>${n.x}</span><button data-d="${i}">✕</button></div>`).join('')||'<p style="opacity:.6">You are all caught up.</p>'}<center style="margin-top:14px;display:flex;gap:10px;justify-content:center"><button id="sc">Close</button><button id="po" class="p">⏻ Power off</button></center>`;
+ sh.querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>{const k=b.dataset.k;if(k=='dark')S.dark=+!S.dark;else{S[k]=+!S[k];if(k=='air'&&S.air)S.wifi=S.bt=0}save();theme();tick();shade()});
+ sh.querySelectorAll('[data-d]').forEach(b=>b.onclick=()=>{N.splice(+b.dataset.d,1);shade()});$('#cl').onclick=()=>{N=[];shade();lockN()};$('#sc').onclick=()=>sh.classList.remove('on');$('#po').onclick=powerOff;$('#br').oninput=e=>{S.br=+e.target.value;save();theme()}}
+$('#sb').onclick=()=>{shade();sh.classList.add('on')};let sy;$('#sb').onpointerdown=e=>sy=e.clientY;
+/* ---- Settings ---- */
+function mSettings(e){let tg='wp';const r=()=>{const tgl=(k,l)=>`<div class="row">${l}<button data-t="${k}" class="${S[k]?'p':''}">${S[k]?'On':'Off'}</button></div>`;
+ e.innerHTML=`<h1>Settings</h1><h3>Wallpaper</h3><div style="display:flex;gap:8px;margin-bottom:10px"><button data-g="wp" class="${tg=='wp'?'p':''}">Home</button><button data-g="lwp" class="${tg=='lwp'?'p':''}">Lock screen</button><button onclick="this.nextSibling.click()">Upload</button><input type="file" accept="image/*" hidden></div>
+ <div class="wg">${WN.map((n,i)=>`<div data-w="${i}" class="${S[tg]==i?'sel':''}" style="background:${wp(i)}" title="${n}"></div>`).join('')}</div>
+ <h3>Theme</h3>${tgl('dark','Dark mode')}<div>${['#3e91ff','#34c759','#ff9500','#ff4d4d','#a259ff','#00c2b8','#ff5fa2'].map(c=>`<span class="sw" data-a="${c}" style="background:${c};border-color:${S.ac==c?'var(--fg)':'transparent'}"></span>`).join('')}</div>
+ <h3>Display</h3><div class=\"row\">Game resolution<b>${S.rw?S.rw+'×'+S.rh:'Auto'}</b></div><div style=\"display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px\">${[['Auto',0,0],['854×480',854,480],['1280×720',1280,720],['1912×948',1912,948],['1912×1912',1912,1912]].map(([n,w,h])=>`<button data-rs=\"${w},${h}\" class=\"${(S.rw||0)==w&&(S.rh||0)==h?'p':''}\">${n}</button>`).join('')}</div><div style=\"display:flex;gap:6px;align-items:center\"><input id=\"rw\" type=\"number\" placeholder=\"width\"> ×  <input id=\"rh\" type=\"number\" placeholder=\"height\"><button class=\"p\" id=\"ra\">Set</button></div><small style=\"opacity:.6;margin:6px 0 10px 12px;display:block\">Applies the next time you open a game. A different shape gets black bars.</small>${tgl('cap','Capture mouse in games')}<h3>Security</h3><div class="row">Lock type<b>${S.lt?S.lt.toUpperCase():'None'}</b></div><input id="pv" placeholder="New PIN (4+ digits) or password (4+ chars)" style="user-select:text"><div style="display:flex;gap:8px;margin:8px 0"><button class="p" id="sp">Set PIN</button><button class="p" id="sw">Set password</button><button id="sn">Remove</button></div>${tgl('lockon','Lock on startup')}
+ <h3>Network</h3>${tgl('wifi','Wi-Fi')}${tgl('bt','Bluetooth')}${tgl('air','Airplane mode')}
+ <h3>System</h3><div class="row">Storage used<b>${(JSON.stringify(S).length/1024).toFixed(1)} KB</b></div><div class="row">Running apps<b>${running.length}</b></div><div class="row">Battery<b>${bat}%</b></div><div class="row">About<b>NovaOS 1.0</b></div><button id="rs">Reset NovaOS</button>`;
+ e.querySelectorAll('[data-g]').forEach(b=>b.onclick=()=>{tg=b.dataset.g;r()});e.querySelectorAll('[data-w]').forEach(b=>b.onclick=()=>{S[tg]=+b.dataset.w;save();theme();r()});
+ e.querySelectorAll('[data-a]').forEach(b=>b.onclick=()=>{S.ac=b.dataset.a;save();theme();r()});e.querySelectorAll('[data-rs]').forEach(b=>b.onclick=()=>{const[w,h]=b.dataset.rs.split(',').map(Number);S.rw=w;S.rh=h;save();r();toast('Resolution saved. Reopen a game to apply')});
+ $('#ra',e).onclick=()=>{const w=+$('#rw',e).value,h=+$('#rh',e).value;if(!(w>=160&&h>=120&&w<=7680&&h<=7680))return toast('Use 160 to 7680 per side');S.rw=w;S.rh=h;save();r();toast(w+'×'+h+' saved. Reopen a game to apply')};e.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>{const k=b.dataset.t;S[k]=+!S[k];if(k=='air'&&S.air)S.wifi=S.bt=0;save();theme();tick();r()});
+ e.querySelector('input[type=file]').onchange=ev=>{const f=ev.target.files[0];if(!f)return;const fr=new FileReader();fr.onload=()=>{S.cust=fr.result;S[tg]=-1;save();theme();r()};fr.readAsDataURL(f)};
+ const v=()=>e.querySelector('#pv').value;$('#sp',e).onclick=()=>{if(!/^\d{4,8}$/.test(v()))return toast('PIN must be 4 to 8 digits');S.lt='pin';S.pin=v();save();setPad();r();toast('PIN saved')};
+ $('#sw',e).onclick=()=>{if(v().length<4)return toast('Password needs 4+ characters');S.lt='pw';S.pin=v();save();setPad();r();toast('Password saved')};$('#sn',e).onclick=()=>{S.lt='';S.pin='';save();setPad();r();toast('Lock removed')};
+ $('#rs',e).onclick=()=>{L.removeItem('nova');location.reload()}};r()}
+/* ---- Store ---- */
+function mStore(e){const r=(q='')=>{e.innerHTML=`<h1>App Store</h1><input id="q" placeholder="Search apps" value="${q}">`+Object.keys(A).filter(i=>A[i].n.toLowerCase().includes(q.toLowerCase())).map(i=>{const a=A[i],ins=S.inst.includes(i);
+ return `<div class="row" style="margin-top:10px"><span style="display:flex;gap:12px;align-items:center"><span class="ic" style="animation:none"><i style="background:${a.c}">${a.i}</i></span><span><b>${a.n}</b><br><small style="opacity:.7">${a.d} ★ ${(4+i.length%10/10).toFixed(1)}</small><div class="bar" id="b-${i}" style="height:4px;border-radius:4px;background:var(--ac);width:0;margin-top:6px;transition:width 1.2s linear"></div></span></span><button data-i="${i}" class="${ins?'':'p'}">${a.sys?'Installed':ins?'Remove':'Install'}</button></div>`}).join('');
+ const qi=$('#q',e);qi.oninput=()=>{r(qi.value);$('#q',e).focus()};e.querySelectorAll('[data-i]').forEach(b=>b.onclick=()=>{const i=b.dataset.i;if(A[i].sys)return;if(S.inst.includes(i)){uninstall(i);r(qi.value);return}
+ b.textContent='Installing…';$('#b-'+i,e).style.width='200px';setTimeout(()=>{S.inst.push(i);save();build();notify(A[i].i,A[i].n+' installed','Find it on your home screen.');toast(A[i].n+' installed');r(qi.value)},1250)})};r()}
+/* ---- Browser ---- */
+const BR={go(){}};
+function mBrowser(e){let tabs=[{h:['']  ,p:0}],t=0;const home='https://en.wikipedia.org';
+ const cu=()=>tabs[t].h[tabs[t].p],r=()=>{e.innerHTML=`<div style="display:flex;gap:6px;overflow:auto;margin-bottom:8px">${tabs.map((x,i)=>`<button data-t="${i}" class="${i==t?'p':''}">${(x.h[x.p]||'New tab').replace(/https?:\/\//,'').slice(0,12)}</button>`).join('')}<button id="nt">＋</button></div>
+ <div style="display:flex;gap:6px"><button id="bk">◀</button><button id="fw">▶</button><button id="rf">⟳</button><input id="u" value="${cu()}" placeholder="Search or type a URL"><button id="bm">${S.bm.includes(cu())?'★':'☆'}</button></div>
+ <div style="margin-top:10px;height:540px;border-radius:16px;overflow:hidden;background:#fff;color:#222">${cu()?`<iframe src="${cu()}" style="width:100%;height:100%;border:0"></iframe>`:`<div style="padding:20px;color:var(--fg)"><h3>Bookmarks</h3>${S.bm.map(b=>`<div class="row" data-b="${b}">${b}</div>`).join('')}<p style="opacity:.6;margin-top:12px">Search runs through Google.</p></div>`}</div>
+ <small style="opacity:.7">If a site stays blank it blocks embedding. <a href="${cu()||home}" target="_blank" style="color:var(--ac)">Open in a new tab</a></small>`;
+ const nav=u=>{const x=tabs[t];x.h=x.h.slice(0,x.p+1);x.h.push(u);x.p++;r()},go=v=>{v=v.trim();if(!v)return;nav(/^https?:\/\//.test(v)?v:/^[\w-]+\.[\w.-]+/.test(v)&&!v.includes(' ')?'https://'+v:'https://www.google.com/search?igu=1&q='+encodeURIComponent(v))};BR.go=go;
+ $('#u',e).onkeydown=k=>k.key=='Enter'&&go(k.target.value);$('#bk',e).onclick=()=>{if(tabs[t].p>0){tabs[t].p--;r()}};$('#fw',e).onclick=()=>{if(tabs[t].p<tabs[t].h.length-1){tabs[t].p++;r()}};$('#rf',e).onclick=r;
+ $('#nt',e).onclick=()=>{tabs.push({h:[''],p:0});t=tabs.length-1;r()};e.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>{t=+b.dataset.t;r()});e.querySelectorAll('[data-b]').forEach(b=>b.onclick=()=>go(b.dataset.b));
+ $('#bm',e).onclick=()=>{const c=cu();if(!c)return;S.bm=S.bm.includes(c)?S.bm.filter(x=>x!=c):[...S.bm,c];save();r()}};r()}
+/* ---- Calculator, Clock ---- */
+function mCalc(e){let x='';e.innerHTML=`<h1 id="o" style="text-align:right;font-size:52px;margin-top:80px;min-height:70px">0</h1><div class="cg">${['C','(',')','/',7,8,9,'*',4,5,6,'-',1,2,3,'+',0,'.','⌫','='].map(k=>`<button class="${/[=]/.test(k)?'p':''}">${k}</button>`).join('')}</div>`;
+ e.querySelectorAll('button').forEach(b=>b.onclick=()=>{const k=b.textContent;if(k=='C')x='';else if(k=='⌫')x=x.slice(0,-1);else if(k=='='){try{if(!/^[\d+\-*/.() ]+$/.test(x))throw 0;x=String(+Function('return '+x)().toFixed(10))}catch(_){x='';toast('Invalid expression')}}else x+=k;$('#o',e).textContent=x||'0'})}
+function mClock(e){let sw=0,st=0,run=0,tl=0;e.innerHTML=`<h1>Clock</h1><div class="row" style="font-size:44px;justify-content:center" id="c1"></div><h3>Stopwatch</h3><div class="row"><b id="s1" style="font-size:30px">0.00</b><span><button id="sg" class="p">Start</button> <button id="sr">Reset</button></span></div><h3>Timer</h3><div class="row"><input id="ti" type="number" value="30" style="width:80px"> sec<b id="t1">--</b><button id="tg" class="p">Go</button></div>`;
+ const i=setInterval(()=>{if(!e.isConnected)return clearInterval(i);$('#c1',e).textContent=new Date().toLocaleTimeString();if(run)$('#s1',e).textContent=((sw+Date.now()-st)/1000).toFixed(2);if(tl){const l=Math.ceil((tl-Date.now())/1000);$('#t1',e).textContent=l>0?l+'s':'Done';if(l<=0){tl=0;notify('⏰','Timer','Time is up');toast('Timer finished')}}},100);
+ $('#sg',e).onclick=ev=>{if(run){sw+=Date.now()-st;run=0;ev.target.textContent='Start'}else{st=Date.now();run=1;ev.target.textContent='Stop'}};$('#sr',e).onclick=()=>{sw=0;st=Date.now();$('#s1',e).textContent='0.00'};$('#tg',e).onclick=()=>tl=Date.now()+$('#ti',e).value*1000}
+/* ---- Notes, Terminal, Weather ---- */
+function mNotes(e){const list=()=>{e.innerHTML=`<h1>Notes</h1><button class="p" id="nn">New note</button><div style="margin-top:12px">${S.notes.map((n,i)=>`<div class="row" data-n="${i}"><span><b>${n.t||'Untitled'}</b><br><small>${n.x.slice(0,40)}</small></span><button data-x="${i}">🗑</button></div>`).join('')||'<p style="opacity:.6">No notes yet. Tap New note to start.</p>'}</div>`;
+ $('#nn',e).onclick=()=>{S.notes.unshift({t:'',x:''});edit(0)};e.querySelectorAll('[data-n]').forEach(b=>b.onclick=()=>edit(+b.dataset.n));e.querySelectorAll('[data-x]').forEach(b=>b.onclick=ev=>{ev.stopPropagation();S.notes.splice(+b.dataset.x,1);save();list()})},
+ edit=i=>{const n=S.notes[i];e.innerHTML=`<button id="bk">◀ Notes</button><input id="nt" placeholder="Title" value="${n.t}" style="margin:12px 0"><textarea id="nx" rows="18" placeholder="Start typing">${n.x}</textarea>`;$('#nt',e).oninput=v=>{n.t=v.target.value;save()};$('#nx',e).oninput=v=>{n.x=v.target.value;save()};$('#bk',e).onclick=list};list()}
+function mTerm(e){let cwd='/home/nova';const F=S.fs,o=el('div','tm','NovaOS shell. Type help.\n');const i=el('input');i.style.marginTop='8px';e.append(el('h1','','Terminal'),o,i);
+ const rp=p=>{const a=(p.startsWith('/')?p:cwd+'/'+p).split('/').filter(Boolean),s=[];a.forEach(x=>x=='..'?s.pop():x!='.'&&s.push(x));return '/'+s.join('/')},kids=d=>Object.keys(F).filter(k=>k!=d&&k.startsWith(d=='/'?'/':d+'/')&&!k.slice(d.length+1).includes('/')&&k!='/');
+ const C={help:()=>'help ls cd pwd cat echo mkdir touch rm clear uname whoami date neofetch ps write',ls:a=>{const d=rp(a[0]||'.');return F[d]!==0?'Not a directory':kids(d).map(k=>k.split('/').pop()+(F[k]===0?'/':'')).join('  ')},cd:a=>{const d=rp(a[0]||'/home/nova');if(F[d]!==0)return 'No such directory';cwd=d},pwd:()=>cwd,
+ cat:a=>{const f=F[rp(a[0]||'')];return typeof f=='string'?f:'No such file'},echo:a=>a.join(' '),mkdir:a=>{F[rp(a[0])]=0;save()},touch:a=>{const p=rp(a[0]);if(F[p]===undefined)F[p]='';save()},rm:a=>{delete F[rp(a[0])];save()},write:a=>{F[rp(a[0])]=a.slice(1).join(' ');save()},
+ clear:()=>{o.textContent=''},uname:()=>'NovaOS 1.0 nova-web x86_64',whoami:()=>'nova',date:()=>new Date().toString(),neofetch:()=>`nova@novaos\nOS: NovaOS 1.0\nKernel: nova-web\nApps: ${S.inst.length}\nRunning: ${running.length}\nBattery: ${bat}%`,ps:()=>'PID NAME\n'+running.map((r,n)=>n+1+'   '+A[r.id].n).join('\n')};
+ i.onkeydown=k=>{if(k.key!='Enter')return;const[c,...a]=i.value.trim().split(/\s+/);o.textContent+=`nova:${cwd}$ ${i.value}\n`;if(c){const f=C[c];const r=f?f(a):c+': command not found';if(r)o.textContent+=r+'\n'}i.value='';o.scrollTop=1e9}}
+function mWeather(e){e.innerHTML=`<h1>Weather</h1><div class="row" style="flex-direction:column;padding:30px;font-size:60px">⛅ <b>18°</b><small>Partly cloudy · sample data</small></div>`+['Sun ☀️ 21°','Mon 🌧 14°','Tue ⛅ 17°','Wed ☀️ 22°','Thu 🌤 20°'].map(x=>`<div class="row">${x}</div>`).join('')}
+/* ---- Game apps (full-screen site, optional touch keys) ---- */
+const KC={KeyW:87,KeyA:65,KeyS:83,KeyD:68,KeyE:69};let kwarn=0;
+const kb=()=>{if(!kwarn){kwarn=1;toast('Keys blocked. Host NovaOS with the game files (not file://).')}};
+const gtarget=w=>{const d=w.document;return d.querySelector('canvas')||d.activeElement||d.body};
+function sendKey(f,i,down){try{const w=f.contentWindow,ev=new w.KeyboardEvent(down?'keydown':'keyup',{key:i.key,code:i.code,bubbles:true,cancelable:true});
+ ['keyCode','which'].forEach(q=>Object.defineProperty(ev,q,{get:()=>i.kc}));gtarget(w).dispatchEvent(ev)}catch(_){kb()}}
+function sendMouse(f,down){try{const w=f.contentWindow,t=gtarget(w),r=t.getBoundingClientRect();t.dispatchEvent(new w.MouseEvent(down?'mousedown':'mouseup',{bubbles:true,cancelable:true,button:0,buttons:down?1:0,clientX:r.left+r.width/2,clientY:r.top+r.height/2,view:w}))}catch(_){kb()}}
+const keyInfo=k=>{if(k.length==1){const u=k.toUpperCase();return{key:k,code:/[a-z]/i.test(k)?'Key'+u:/\d/.test(k)?'Digit'+k:k==' '?'Space':'',kc:k==' '?32:u.charCodeAt(0)}}
+ const M={Enter:13,Backspace:8,Escape:27,Tab:9,ArrowLeft:37,ArrowUp:38,ArrowRight:39,ArrowDown:40};return{key:k,code:k,kc:M[k]||0}};
+function mGame(e,loc,rem,ctl){e.style.cssText='padding:0;overflow:hidden;background:#000';
+ /* resolution: render the game bigger/smaller, then scale it back to fit the 796x390 screen */
+ const RW=S.rw||796,RH=S.rh||390,sc=Math.min(796/RW,390/RH),f=el('iframe');f.allow='fullscreen;autoplay;gamepad;clipboard-write';
+ f.style.cssText=`position:absolute;left:${(796-RW*sc)/2}px;top:${(390-RH*sc)/2}px;width:${RW}px;height:${RH}px;border:0;background:#000;display:block;transform:scale(${sc});transform-origin:0 0`;e.append(f);
+ fetch(loc,{method:'HEAD'}).then(r=>r.ok?loc:rem).catch(()=>rem).then(u=>f.src=u);if(!ctl)return;
+ const foc=()=>{try{f.contentWindow.focus()}catch(_){}};
+ const B='position:absolute;display:grid;place-items:center;color:#fff;font-weight:700;touch-action:none;background:rgba(0,0,0,.4);border:2px solid rgba(255,255,255,.55);z-index:5;';
+ const pad=el('div','',`<span data-k="KeyW" style="position:absolute;top:6px;left:0;right:0;text-align:center">W</span><span data-k="KeyS" style="position:absolute;bottom:6px;left:0;right:0;text-align:center">S</span><span data-k="KeyA" style="position:absolute;left:10px;top:50%;transform:translateY(-50%)">A</span><span data-k="KeyD" style="position:absolute;right:10px;top:50%;transform:translateY(-50%)">D</span><i style="position:absolute;left:39px;top:39px;width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,.35)"></i>`);
+ pad.style.cssText=B+'left:26px;bottom:26px;width:130px;height:130px;border-radius:50%;font-size:18px';
+ const eb=el('div','','E');eb.style.cssText=B+'left:25%;top:25%;width:64px;height:64px;transform:translate(-50%,-50%);border-radius:50%;font-size:26px';
+ const ab=el('div','','⚔️');ab.style.cssText=B+'right:34px;bottom:60px;width:84px;height:84px;border-radius:50%;font-size:34px';
+ const kbtn=el('div','','⌨');kbtn.style.cssText=B+'left:12px;top:12px;width:44px;height:44px;border-radius:12px;font-size:22px';
+ const kn=pad.querySelector('i'),on=new Set(),set=(c,v)=>{if(v&&!on.has(c)){on.add(c);sendKey(f,{key:c.slice(3).toLowerCase(),code:c,kc:KC[c]},1)}else if(!v&&on.has(c)){on.delete(c);sendKey(f,{key:c.slice(3).toLowerCase(),code:c,kc:KC[c]},0)}else return;const s=pad.querySelector(`[data-k=${c}]`);if(s)s.style.color=v?'#ffd24a':''};let drag=0;
+ /* undo the screen scale and any whole-device rotation when reading the pointer */
+ const mv=ev=>{const r=pad.getBoundingClientRect(),k=r.width/pad.offsetWidth,ox=(ev.clientX-r.left-r.width/2)/k,oy=(ev.clientY-r.top-r.height/2)/k;let x=OSROT?-oy:ox,y=OSROT?ox:oy;const d=Math.hypot(x,y),m=40;if(d>m){x*=m/d;y*=m/d}
+  kn.style.transform=`translate(${x}px,${y}px)`;set('KeyW',y<-14);set('KeyS',y>14);set('KeyA',x<-14);set('KeyD',x>14)};
+ const end=()=>{drag=0;kn.style.transform='';['KeyW','KeyA','KeyS','KeyD'].forEach(c=>set(c,0))};
+ pad.onpointerdown=ev=>{drag=1;pad.setPointerCapture(ev.pointerId);foc();mv(ev)};pad.onpointermove=ev=>drag&&mv(ev);pad.onpointerup=pad.onpointercancel=end;
+ eb.onpointerdown=ev=>{eb.setPointerCapture(ev.pointerId);foc();sendKey(f,keyInfo('e'),1)};eb.onpointerup=eb.onpointercancel=()=>sendKey(f,keyInfo('e'),0);
+ ab.onpointerdown=ev=>{ab.setPointerCapture(ev.pointerId);foc();sendMouse(f,1)};ab.onpointerup=ab.onpointercancel=()=>sendMouse(f,0);
+ /* keyboard button: opens the phone keyboard and types into the game (chat, signs, text fields) */
+ const inp=el('input'),Z='\u200b',tap=k=>{const i=keyInfo(k);sendKey(f,i,1);sendKey(f,i,0)};inp.value=Z;inp.autocomplete='off';inp.setAttribute('autocapitalize','off');inp.style.cssText='position:absolute;left:12px;top:62px;width:40px;height:30px;opacity:0;z-index:4';
+ kbtn.onpointerup=()=>{inp.value=Z;inp.focus()};
+ inp.oninput=ev=>{if(ev.inputType=='deleteContentBackward')tap('Backspace');else if(ev.data)for(const c of ev.data)tap(c);inp.value=Z};
+ inp.onkeydown=ev=>{if(['Enter','Backspace','Escape','ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Tab'].includes(ev.key)){ev.preventDefault();tap(ev.key)}};
+ e.append(pad,eb,ab,kbtn,inp)}
+/* ---- Links: open any URL inside NovaOS ---- */
+const fixU=v=>{v=v.trim();return !v?'':/^https?:\/\//i.test(v)?v:/^[\w-]+\.[\w.-]+/.test(v)&&!v.includes(' ')?'https://'+v:'https://www.google.com/search?igu=1&q='+encodeURIComponent(v)};
+const frameH=u=>`<div style="height:700px;margin-top:10px;border-radius:14px;overflow:hidden;background:#fff"><iframe src="${u}" style="width:100%;height:100%;border:0"></iframe></div><small style="opacity:.7">If a site stays blank it blocks embedding.</small>`;
+function regWeb(w){A[w.id]={n:w.n,i:'🌐',c:'#0a84ff',d:w.u,m:e=>{e.innerHTML=frameH(w.u)}}}
+function mWeb(e){let u='';e.innerHTML=`<h1>Links</h1><div style="display:flex;gap:6px"><input id="wu" placeholder="Paste a link or search"><button class="p" id="wg">Open</button></div><button id="wa" style="margin-top:8px">＋ Add to home screen</button><div id="wf"></div>`;
+ const go=()=>{u=fixU($('#wu',e).value);if(u)$('#wf',e).innerHTML=frameH(u)};
+ $('#wg',e).onclick=go;$('#wu',e).onkeydown=k=>k.key=='Enter'&&go();
+ $('#wa',e).onclick=()=>{if(!u)return toast('Open a link first');let h=u;try{h=new URL(u).hostname.replace(/^www\./,'')}catch(_){}
+  const n=prompt('Name for this app',h);if(!n)return;const w={id:'w_'+Date.now(),n:n.slice(0,12),u};S.web.push(w);S.inst.push(w.id);regWeb(w);save();build();toast(w.n+' added to home screen')}}
+S.web=S.web||[];S.web.forEach(regWeb);
+if(!S.g3){S.g3=1;['mc','gd'].forEach(i=>S.inst.includes(i)||S.inst.push(i));save()}
+if(!S.g2){S.g2=1;S.inst.includes('web')||S.inst.push('web');save()}
+document.addEventListener('pointerup',ev=>{const t=ev.target.closest&&ev.target.closest('input,textarea');if(t&&document.activeElement!==t)t.focus()});
+/* ---- boot ---- */
+const cv=(e,t)=>{e.innerHTML=`<h1>${t}</h1><div class='scr' style='margin-bottom:8px'>Score 0</div><canvas width='340' height='340' style='width:100%;border-radius:20px;background:#070a14;border:1px solid var(--ac);box-shadow:0 0 24px color-mix(in srgb,var(--ac) 35%,transparent);touch-action:none'></canvas>`;const c=$('canvas',e);return[c,c.getContext('2d'),s=>$('.scr',e).textContent='Score '+s]};
+const loop=(e,f,ms)=>{const i=setInterval(()=>{if(!e.isConnected)return clearInterval(i);f()},ms)};
+const keys=(e,f)=>{const k=v=>{if(!e.isConnected)return removeEventListener('keydown',k);f(v)};addEventListener('keydown',k)};
+function mSnake(e){const[c,x,sc]=cv(e,'Snake');let s=[[8,8]],d=[1,0],f=[12,8],n=0,over=0,px,py;const dir=(a,b)=>{if(a!=-d[0]||b!=-d[1])d=[a,b]};
+ keys(e,v=>{const m={ArrowLeft:[-1,0],ArrowRight:[1,0],ArrowUp:[0,-1],ArrowDown:[0,1]}[v.key];if(m){dir(...m);v.preventDefault()}});
+ c.onpointerdown=v=>{px=v.clientX;py=v.clientY};c.onpointerup=v=>{const a=v.clientX-px,b=v.clientY-py;if(over){s=[[8,8]];d=[1,0];n=0;over=0;sc(0);return}if(Math.max(Math.abs(a),Math.abs(b))<12)return;Math.abs(a)>Math.abs(b)?dir(a>0?1:-1,0):dir(0,b>0?1:-1)};
+ loop(e,()=>{if(!over){const h=[s[0][0]+d[0],s[0][1]+d[1]];if(h[0]<0||h[1]<0||h[0]>16||h[1]>16||s.some(q=>q[0]==h[0]&&q[1]==h[1])){over=1;toast('Game over. Tap to restart')}else{s.unshift(h);if(h[0]==f[0]&&h[1]==f[1]){n++;sc(n);f=[Math.random()*17|0,Math.random()*17|0]}else s.pop()}}
+ x.fillStyle='#070a14';x.fillRect(0,0,340,340);x.fillStyle='#ff6ad5';x.fillRect(f[0]*20+3,f[1]*20+3,14,14);x.fillStyle=S.ac;s.forEach(q=>x.fillRect(q[0]*20+1,q[1]*20+1,18,18))},110)}
+function mTTT(e){let b=Array(9).fill(''),over='';const W=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]],win=p=>W.some(l=>l.every(i=>b[i]==p));
+ const r=()=>{e.innerHTML=`<h1>Tic-Tac-Toe</h1><div class='cg' style='grid-template-columns:repeat(3,1fr)'>${b.map((v,i)=>`<button data-i='${i}' style='height:100px;font-size:44px'>${v}</button>`).join('')}</div><p style='margin:14px 0'>${over||'You are X. Your move.'}</p><button class='p' id='rs'>New game</button>`;
+  e.querySelectorAll('[data-i]').forEach(q=>q.onclick=()=>{const i=+q.dataset.i;if(b[i]||over)return;b[i]='X';if(win('X'))over='You win!';else if(!b.includes(''))over='Draw';else{let m=-1;for(const p of['O','X'])for(const l of W){const em=l.find(j=>!b[j]);if(m<0&&em!=null&&l.filter(j=>b[j]==p).length==2)m=em}if(m<0)m=b[4]===''?4:b.findIndex(v=>!v);b[m]='O';if(win('O'))over='Nova wins';else if(!b.includes(''))over='Draw'}r()});$('#rs',e).onclick=()=>{b=Array(9).fill('');over='';r()}};r()}
+function mMem(e){let c=['🚀','🛸','🌙','⭐','🔥','💎','🎮','🧩'].flatMap(x=>[x,x]).sort(()=>Math.random()-.5),o=[],dn=new Set(),mv=0,lk=0;
+ const r=()=>{e.innerHTML=`<h1>Memory</h1><p>Moves ${mv} · Pairs ${dn.size/2}/8</p><div class='cg' style='margin-top:10px'>${c.map((v,i)=>`<button data-i='${i}' style='height:76px;font-size:30px'>${o.includes(i)||dn.has(i)?v:'❔'}</button>`).join('')}</div><button class='p' id='rs' style='margin-top:14px'>Shuffle</button>`;
+  e.querySelectorAll('[data-i]').forEach(b=>b.onclick=()=>{const i=+b.dataset.i;if(lk||o.includes(i)||dn.has(i))return;o.push(i);if(o.length==2){mv++;if(c[o[0]]==c[o[1]]){o.forEach(j=>dn.add(j));o=[];if(dn.size==16)toast('You won in '+mv+' moves!')}else{lk=1;r();setTimeout(()=>{o=[];lk=0;r()},700);return}}r()});$('#rs',e).onclick=()=>{c.sort(()=>Math.random()-.5);o=[];dn.clear();mv=0;r()}};r()}
+function mFlap(e){const[c,x,sc]=cv(e,'Nova Flap');let y=170,v=0,P=[],t=0,n=0,over=1;x.font='22px Figtree';const jump=()=>{if(over){y=170;v=0;P=[];n=0;t=0;over=0;sc(0)}else v=-6.2};c.onpointerdown=jump;keys(e,k=>{if(k.code=='Space'){jump();k.preventDefault()}});
+ loop(e,()=>{x.fillStyle='#070a14';x.fillRect(0,0,340,340);if(!over){v+=.38;y+=v;t++;if(t%90==1)P.push({x:340,g:50+Math.random()*170});P.forEach(p=>p.x-=2.4);if(P.length&&P[0].x<-40){P.shift();n++;sc(n)}if(y<0||y>340||P.some(p=>p.x<61&&p.x+40>39&&(y-11<p.g||y+11>p.g+95)))over=1}
+  x.fillStyle='#ff6ad5';P.forEach(p=>{x.fillRect(p.x,0,40,p.g);x.fillRect(p.x,p.g+95,40,340)});x.fillStyle=S.ac;x.beginPath();x.arc(50,y,11,0,7);x.fill();if(over){x.fillStyle='#fff';x.fillText('Tap to play',118,170)}},16)}
+function mPong(e){const[c,x,sc]=cv(e,'Pong');let b={x:170,y:170,dx:3,dy:2.4},p=140,a=140,n=0;c.onpointermove=v=>{const r=c.getBoundingClientRect();p=(v.clientX-r.left)/r.width*340-30};
+ loop(e,()=>{b.x+=b.dx;b.y+=b.dy;if(b.x<8||b.x>332)b.dx*=-1;a+=Math.max(-2.6,Math.min(2.6,b.x-30-a));if(b.y<22&&b.x>a-4&&b.x<a+64&&b.dy<0)b.dy*=-1.04;if(b.y>318&&b.x>p-4&&b.x<p+64&&b.dy>0){b.dy*=-1.04;n++;sc(n)}
+  if(b.y<0||b.y>340){if(b.y<0){n+=3;sc(n)}else{n=0;sc(0)}b={x:170,y:170,dx:3*(Math.random()<.5?1:-1),dy:2.4}}
+  x.fillStyle='#070a14';x.fillRect(0,0,340,340);x.fillStyle='#ff6ad5';x.fillRect(a,10,60,8);x.fillStyle=S.ac;x.fillRect(p,322,60,8);x.fillStyle='#fff';x.beginPath();x.arc(b.x,b.y,7,0,7);x.fill()},16)}
+function mReact(e){let st=0,t=0,tid;e.innerHTML=`<h1>Reaction</h1><button id='rb' style='width:100%;height:300px;font-size:24px;border-radius:26px'>Tap to start</button><p id='rr' style='margin-top:12px'></p>`;const b=$('#rb',e),r=$('#rr',e);
+ b.onclick=()=>{if(st==0){st=1;b.textContent='Wait for green…';b.style.background='#c0392b';tid=setTimeout(()=>{st=2;t=Date.now();b.textContent='TAP!';b.style.background='#27ae60'},1000+Math.random()*2500)}else if(st==1){clearTimeout(tid);st=0;b.textContent='Too early! Tap to retry';b.style.background=''}else{const ms=Date.now()-t;st=0;if(!S.rbest||ms<S.rbest){S.rbest=ms;save()}r.textContent=`${ms} ms · best ${S.rbest} ms`;b.textContent='Tap to go again';b.style.background=''}}}
+function mWhack(e){let n=0,m=-1,t=30;e.innerHTML=`<h1>Whack</h1><p class='gs'>Score 0 · 30s</p><div class='cg' style='grid-template-columns:repeat(3,1fr);margin-top:10px'>${[...Array(9)].map((_,i)=>`<button data-i='${i}' style='height:96px;font-size:40px'></button>`).join('')}</div>`;const bs=e.querySelectorAll('[data-i]'),g=$('.gs',e);
+ bs.forEach(b=>b.onclick=()=>{if(+b.dataset.i==m&&t>0){n++;m=-1;bs.forEach(q=>q.textContent='')}});const i=setInterval(()=>{if(!e.isConnected)return clearInterval(i);if(t<=0)return;t-=.7;m=Math.random()*9|0;bs.forEach((q,j)=>q.textContent=j==m?'👾':'');g.textContent=`Score ${n} · ${Math.max(0,Math.ceil(t))}s`},700)}
+function powerOff(){[...running].forEach(r=>closeApp(r.id));sh.classList.remove('on');const o=$('#off');o.className='on';o.innerHTML='<p>Powering off…</p>';setTimeout(()=>{o.innerHTML='<button class="p" id="pon" style="font-size:20px;padding:16px 26px">⏻ Power on</button>';$('#pon').onclick=boot},1200)}
+function boot(){const o=$('#off');o.innerHTML='<b style="font-size:36px;letter-spacing:3px;animation:pop .8s both">NovaOS</b>';setTimeout(()=>{doLock();if(!(S.lockon&&S.lt))lk.classList.add('up');o.className=''},1500)}
+{const sl=$('#sl'),k=$('#sk');let d=0,sx=0,x=0;const mx=()=>sl.offsetWidth-k.offsetWidth-8;
+k.onpointerdown=e=>{d=1;sx=e.clientX;k.setPointerCapture(e.pointerId);k.style.transition='none';e.stopPropagation()};
+k.onpointermove=e=>{if(!d)return;x=Math.max(0,Math.min(mx(),(e.clientX-sx)/(sl.getBoundingClientRect().width/sl.offsetWidth)));k.style.transform=`translateX(${x}px)`;sl.style.setProperty('--p',x/mx())};
+k.onpointerup=k.onpointercancel=e=>{e.stopPropagation();if(!d)return;d=0;k.style.transition='.25s';const go=x>mx()*.7;k.style.transform='';sl.style.setProperty('--p',0);x=0;if(go)unlockTry()}}
+$('#lp').onclick=e=>{e.stopPropagation();powerOff()};
+if(!S.g1){S.g1=1;['snake','flap','mem','ttt','pong','react','whack'].forEach(i=>S.inst.includes(i)||S.inst.push(i));save()}
+theme();build();setPad();doLock();if(!(S.lockon&&S.lt))lk.classList.add('up');
+</script></body></html>

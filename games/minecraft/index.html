@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html style="width:100%;height:100%;background:#000"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1">
+<title>Minecraft: BE</title>
+<script>
+/* "Capture mouse in games" off (NovaOS Settings): fake the lock so the cursor stays free but the game stays active */
+(function(){var off=false;try{off=JSON.parse(localStorage.nova).cap===0}catch(e){}
+if(!off)return;var el=null,fire=function(t){setTimeout(function(){t.dispatchEvent(new Event("pointerlockchange",{bubbles:true}))},0)};
+Object.defineProperty(Document.prototype,"pointerLockElement",{get:function(){return el},configurable:true});
+Element.prototype.requestPointerLock=function(){el=this;fire(this)};
+Document.prototype.exitPointerLock=function(){if(el){var t=el;el=null;fire(t)}};})();
+</script>
+<script src="classes.js"></script>
+<script>
+"use strict";
+addEventListener("load",function(){
+  var REMOTE="https://minecraftweb.pages.dev/", id=Math.floor(Math.random()*3);
+  /* use assets.epk + lang/ next to this file if present, otherwise the online copy */
+  fetch("assets.epk",{method:"HEAD"}).then(function(r){return r.ok}).catch(function(){return false}).then(function(local){
+    window.eaglercraftXOpts={
+      demoMode:false,container:"game_frame",
+      assetsURI:local?"assets.epk":REMOTE+"assets.epk",
+      localesURI:local?"lang/":REMOTE+"lang/",
+      worldsDB:"worlds",servers:[],
+      relays:[
+        {addr:"wss://relay.deev.is/",comment:"lax1dude relay #1",primary:id==0},
+        {addr:"wss://relay.lax1dude.net/",comment:"lax1dude relay #2",primary:id==1},
+        {addr:"wss://relay.shhnowisnottheti.me/",comment:"ayunami relay #1",primary:id==2}
+      ]};
+    main();
+  });
+});
+</script></head>
+<body style="margin:0;width:100%;height:100%;overflow:hidden;background:#000" id="game_frame"></body></html>
